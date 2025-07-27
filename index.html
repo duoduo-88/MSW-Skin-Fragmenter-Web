@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1</title>
+  <style>
+    /* ... 你的CSS原樣保留 ... */
+    html, body { height:100%; margin:0; padding:0; background: #222;}
+    body { font-family: Arial, sans-serif; margin:0; padding:0;}
+    #mainwrap { max-width:1280px; margin:0 auto; padding-top:38px;}
+    .headerwrap { display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:12px;}
+    .tooltitle { font-size: 1.6em; margin: 0 0 6px 0; color: #fff; text-align: center; letter-spacing:1.2px;}
+    .copyright { color:#aaa; font-size:15px; margin-bottom:18px; text-align:center; word-break:break-all; white-space:normal; max-width:900px;}
+    .copyright a { color:#ccc; text-decoration: underline; }
+    .disclaimer {
+      display:inline-block; color:#99c;
+      font-size:13px; margin-left:10px; cursor:pointer; border-bottom:1px dashed #99c; position:relative;
+    }
+    .disclaimer-tip {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 130%;
+      background: #242236;
+      color: #fff;
+      z-index: 1001;
+      padding: 10px 14px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px #0004;
+      font-size: 14px;
+      min-width: 200px;
+      max-width: 320px;
+      white-space: pre-line;
+      text-align: left;
+    }
+    .disclaimer:hover .disclaimer-tip, .disclaimer:focus .disclaimer-tip { display:block; }
+    .flexrow { display: flex; flex-direction: row; align-items: flex-start; column-gap: 28px; justify-content: center; }
+    .left-pane { max-width: 600px; flex-grow: 1; }
+    .right-pane { max-width: 250px; flex-grow: 1; }
+    .panel-status { min-height:32px; margin-bottom: 12px; word-break: break-all; white-space: pre-line; font-weight: bold; text-align:left; color: #0f0; font-size: 15px; max-width: 100%; }
+    .panel-status.warn { color: #f55; }
+    .ctrl-block { margin-bottom: 13px; word-break: break-word; color:#eee;}
+    label { display:block; margin-bottom:3px; font-size:15px; color:#eee;}
+    input[type="number"],input[type="file"],select { font-size:15px; padding:3px 5px; margin-bottom:4px; max-width:100%; color:#222;}
+    .btns button { margin-right:9px; margin-bottom:4px; }
+    #previewAreaBox { width: 600px; height: 780px; border:2px solid #444; background:#333; margin-bottom:16px; position:relative; display:flex; align-items:center; justify-content:center; overflow: hidden; touch-action:none;}
+    #mainPreviewBg { position: absolute; left:0; top:0; width:100%; height:100%; z-index:0; background:#333;}
+    #mainPreviewCanvas { z-index:1; position:absolute; left:0; top:0; display:block; image-rendering: pixelated; pointer-events: none;}
+    .preview-bg-white { background:#fff; }
+    .preview-bg-gray { background:#888; }
+    .preview-bg-dark { background:#222; }
+    .preview-ctrl-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      margin-bottom: 10px;
+      margin-top: 0;
+      width: 600px;
+      justify-content: flex-end;
+      flex-wrap: nowrap;
+    }
+    .preview-ctrl-bar .label.light { color: #fff; font-weight: bold; font-size: 15.5px; margin-right: 5px; letter-spacing: 1.3px; }
+    .preview-ctrl-bar button { font-size: 15px; border: none; border-radius: 7px; padding: 3px 14px; cursor: pointer; background: #444; color: #fff;}
+    .preview-ctrl-bar button.active,
+    .preview-ctrl-bar button:hover { background: #666; color: #fff; }
+    .zoomval { color: #fff; min-width: 88px; display: inline-block; text-align: right; white-space: nowrap; margin-left: 16px; font-size: 15px;}
+    .zoomval { color: #fff; min-width: 84px; display: inline-block; text-align: left; white-space: nowrap; margin-left: 12px;}
+    #fragmentPanel { background: #1a1a1a; border-radius:14px; padding:18px 12px 20px 12px; color:#eee; box-shadow:0 2px 10px #0002; margin-bottom: 20px;}
+	.fragment-row {
+	  background: #232435;
+	  border-bottom: 1px solid #36384a;
+	  display: flex;
+	  align-items: center;
+	  padding: 0 0;          /* 上下間距變0 */
+	  font-size: 13px;       /* 稍微小一點 */
+	  gap: 0.25em;           /* 行距更小 */
+	  height: 24px;          /* 更矮 */
+	  min-height: 20px;
+	}
+    .fragment-row.selected { background: #e6e6e6 !important; box-shadow: 0 0 0 2px #cfcfcf inset;}
+    .fragment-btns { display: flex; gap: 5px; margin-right: 6px;}
+	.fragment-btns button {
+	  padding: 0 6px;
+	  font-size: 12px;
+	  min-width: 32px;
+	}	
+    .fragment-btns button:last-child { margin-left: 8px;}	
+	/* fragment-name 長度更短 */
+	.fragment-name {
+	  font-size: 12px;
+	  padding: 5px 10px;
+	  min-width: 100px;
+	  max-width: 200px;
+	  height: 20px;
+	  line-height: 1.6;
+	  border-radius: 4px;
+	  background: #232435;
+	  color: #d5d7df;      /* 淺灰 */
+	  border: none;
+	  outline: none;
+	  box-sizing: border-box;
+	  transition: background 0.18s, color 0.18s, border 0.18s;
+	  cursor: pointer;
+	}
+	.fragment-name.editable {
+	  background: #fff;
+	  color: #1a1a33;
+	  border: 2px solid #4285f4;     /* 藍色框 */
+	  outline: none;
+	  cursor: text;
+	}
+	.fragment-row.selected .fragment-name {
+	  color: #232435 !important; /* 被選中的列,字色變深 */
+	  background: #e6e6e6 !important;
+	}
+	.fragment-name[readonly] {
+	  pointer-events: auto;
+	  caret-color: transparent; /* 讓游標消失 */
+	}	
+    .qmark { margin-left: 4px; cursor: pointer; display: inline-block; color: #fff; background: #555; border-radius: 50%; width: 18px; height: 18px; text-align: center; font-size: 15px; font-weight: bold; line-height: 18px; vertical-align: middle; position: relative;}
+    .qtip { display: none; position: absolute; left: 120%; top: 50%; transform: translateY(-50%); background: #222; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 15px; z-index: 1001; min-width: 210px; max-width: 90vw; box-shadow: 0 2px 8px #0008; white-space: pre-line; text-align: left; word-break: break-word;}
+    .qmark:hover .qtip, .qmark:focus .qtip { display: block; }
+    @media (max-width:800px) { #mainwrap { max-width:99vw;} .flexrow { flex-direction:column;} .right-pane { margin-left:0;margin-top:22px;max-width:99vw;width:99vw;} #previewAreaBox, .preview-ctrl-bar { width:99vw; min-width:99vw; max-width:99vw;}}
+    @media (max-width:620px) { .fragment-name { font-size:12px; } }
+    #mainPreviewBg { position: absolute; left:0; top:0; width:100%; height:100%; z-index: 0; pointer-events: none; transition: background 0.16s;}
+    #mainPreviewBg.preview-bg-white { background: #fff !important; }
+    #mainPreviewBg.preview-bg-gray { background: #888 !important; }
+    #mainPreviewBg.preview-bg-dark { background: #222 !important; }
+	/* fragment-list-title 更小 */
+	.fragment-list-title {
+	  margin-bottom: 8px;
+	  font-size: 14px;
+	}	
+    .file-block { margin-bottom: 16px; color: #eee; font-size: 15px;}
+    .file-block > label { display: block; margin-bottom: 6px; user-select: none;}
+    .file-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px;}
+    .file-input-row.single-button { display: block; margin-bottom: 4px;}
+    .file-input-row .clear-filename-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;}
+    .file-input-row input[type="file"] { flex-shrink: 0;}
+    .clear-btn { font-size: 20px; background: transparent; border: none; color: #f55; cursor: pointer; padding: 0; line-height: 1; flex-shrink: 0;}
+    .filename { font-size: 14px; color: #ddd; word-break: break-word; white-space: normal; user-select: text; flex-grow: 1; min-width: 0;}
+  </style>
+</head>
+<body>
+  <div id="mainwrap">
+    <div class="headerwrap">
+      <div class="tooltitle">MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1</div>
+      <div class="copyright">
+        © 2025 DuoDuo｜聯絡信箱：
+        <a href="mailto:duoduobaobao88@gmail.com">duoduobaobao88@gmail.com</a>
+        <span class="disclaimer" tabindex="0">
+          免責聲明
+          <span class="disclaimer-tip">此網頁圖像拆解工具無償提供使用，基於加密學的基本原則（Kerckhoffs's Principle），圖像的安全性應建立於輸入與內容的不確定性，而非演算法的隱蔽性。然而，實際使用中，每張圖像內容與參數配置皆存在高度變異性，無法保證所有拆解後的圖片均無法被還原或遭到破解。使用者應了解並接受此工具僅為輔助性保護機制，所有風險與後果由使用者自行承擔。</span>
+        </span>
+		</span>
+		<span class="disclaimer" tabindex="0" style="margin-left:18px;">
+		  開源聲明
+		  <span class="disclaimer-tip">本工具以開源方式發布，任何人皆可自由檢視、學習、修改與再發佈。原始碼、說明文件與最新版本均可於 GitHub 取得。請遵守原授權條款（如 MIT、GPL 等），並保留原作者資訊。如有改作、二次發布，請明確標示來源。
+		  </span>
+		</span>		
+      </div>
+    </div>
+    <div class="flexrow">
+      <div class="left-pane">
+        <div class="preview-ctrl-bar">
+          <span class="label light">背景：</span>
+          <button type="button" id="bg-dark">深灰</button>
+          <button type="button" id="bg-gray">50%灰</button>
+          <span class="zoomval">縮放：<span id="zoomVal">100%</span></span>
+        </div>
+        <div id="previewAreaBox">
+          <div id="mainPreviewBg"></div>
+          <canvas id="mainPreviewCanvas"></canvas>
+        </div>
+      </div>
+      <div class="right-pane">
+        <div id="status" class="panel-status"></div>
+        <div class="ctrl-block file-block">
+        <!-- 主圖 -->
+        <div class="file-block">
+          <label for="mainImage">上傳主圖（PNG，含透明區）：<span class="qmark" tabindex="0">?<span class="qtip">請上傳要分割的原始圖檔，需為 PNG 格式並包含透明區域。
+		  
+		  建議尺寸：2750 x 3500 如尺寸不同仍可使用，但不相容官方模板。
+		  
+		  * 主圖將作為防盜分割的依據，請勿壓縮或去除透明度。</span></span></label>
+          <div class="file-input-row single-button">
+            <input type="file" id="mainImage" accept="image/png" onchange="onMainImageChange(this)">
+          </div>
+          <div class="file-input-row clear-filename-row">
+            <button class="clear-btn" onclick="clearFile('mainImage')">&times;</button>
+            <span class="filename" id="mainImageFilename">未選擇檔案</span>
+          </div>
+        </div>
+        <!-- 遮罩 -->
+        <div class="file-block">
+          <label for="maskImage">上傳遮罩圖（可選）：<span class="qmark" tabindex="0">?<span class="qtip">可選擇上傳一張 PNG 遮罩圖，遮罩需與主圖解析度完全相同。
+		  
+		  僅遮罩圖完全不透明的區域才會參與碎片分割，適合想限制分割區域或留用特定區域圖像時使用。
+		  
+		  * 若未上傳遮罩，會以主圖透明度決定分割範圍</span></span></label>
+          <div class="file-input-row single-button">
+            <input type="file" id="maskImage" accept="image/png" onchange="onMaskImageChange(this)">
+          </div>
+          <div class="file-input-row clear-filename-row">
+            <button class="clear-btn" onclick="clearFile('maskImage')">&times;</button>
+            <span class="filename" id="maskImageFilename">未選擇檔案</span>
+          </div>
+        </div>
+        <div class="ctrl-block">
+          <label for="splitCount">拆分張數（1~10）
+            <span class="qmark" tabindex="0">?
+              <span class="qtip">決定要將圖片分割成幾個碎片，通常越多越難重組與逆向。</span>
+            </span>
+          </label>
+          <input type="number" id="splitCount" min="1" max="10" value="2" style="width:70px;">
+        </div>
+        <div class="ctrl-block">
+          <label for="blockSize">方塊尺寸（1~30 px）：
+            <span class="qmark" tabindex="0">?
+              <span class="qtip">方塊尺寸決定單一分割區塊的基本大小，數字越大，每個分割塊越大。
+			  
+				優點：
+				・大尺寸區塊可快速拆解大面積，提升執行效率。
+				・有助於產生結構明顯的碎片，方便製作干擾用途。
+				
+				缺點：
+				・過大會讓單一碎片含有太多可識別內容，增加還原風險。
+				・過小則執行速度較慢，產生過多碎片，管理較麻煩。
+				・若尺寸不適合主圖細節，可能會出現不連貫的邊緣或小細節遺失。
+			  </span>
+            </span>
+          </label>
+          <input type="number" id="blockSize" min="1" max="30" value="10" style="width:70px;">
+        </div>
+        <div class="ctrl-block">
+          <label for="randomRange">尺寸隨機度（1~100）：
+            <span class="qmark" tabindex="0">?
+              <span class="qtip">方塊尺寸的隨機倍率範圍，數值1=尺寸固定，2=尺寸會隨機在設定值的 1~2 倍間變化 
+			 
+				優點：
+				・增加隨機度可讓分割區塊形狀更不規則、不均一，有效提升防逆向還原的難度。
+				・可以減少人工或AI從規則分割去推測還原順序。
+
+				缺點：
+				・隨機度過高時，可能會產生較大的區塊，導致有些碎片內含資訊較多，安全性反而降低。
+				・碎片尺寸過於參差，視覺效果不一致，可能不符合部分應用需求。
+			  </span></span>
+            </span>
+          </label>
+          <input type="number" id="randomRange" min="1" max="100" value="1" style="width:70px;">
+        </div>
+        <div class="ctrl-block">
+          <label>
+            <input type="checkbox" id="enableInterference">
+            啟用原圖裁切干擾像素
+            <span class="qmark" tabindex="0">?
+              <span class="qtip">啟用後，會於第2層以後碎片，以第1層碎片的不透明區域「填充」主圖中隨機區塊做為干擾像素。
+
+				優點：
+				可增加每張碎片的內容混淆，降低被還原的機率。
+				碎片彼此重疊的內容不再完全相同。
+
+				注意事項：
+				至少需2張碎片。
+				若原圖本身內容重複、純色區域多，干擾效果較弱。</span>
+            </span>
+          </label>
+        </div>
+        <!-- 新增 干擾密度滑桿 -->
+        <div id="interferenceOptions" style="display:none;">
+          <div class="ctrl-block">
+            <label for="fillDensity">干擾密度：
+              <span class="qmark" tabindex="0">?
+                <span class="qtip">決定第一片不透明範圍中，要填補多少比例的干擾素材（100%=全補）。</span>
+              </span>
+            </label>
+            <input type="range" id="fillDensity" min="1" max="100" value="50" style="width:120px;">
+            <span id="fillDensityVal">100%</span>
+          </div>
+        </div>
+        <div class="ctrl-block btns">
+          <button onclick="processSplit()">執行拆解</button>
+          <button onclick="showAllFragments()">還原預覽</button>
+          <button onclick="downloadAll()">全部打包ZIP</button>
+        </div>
+        <div class="fragment-list-title">碎片清單</div>
+        <div id="fragmentPanel">
+          <div id="fragmentList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.0/dist/jszip.min.js"></script>
+<script>
+let fragmentCanvases = [], fragmentNames = [];
+let w = 0, h = 0, mainImageInfo = null, lastInterfereFlag = false;
+let currentMode = "all";
+let previewBg = 'dark';
+let previewZoom = 1, previewOffset = {x:0, y:0};
+let previewFitZoom = 1;
+
+function computeFitZoom() {
+  let box = document.getElementById("previewAreaBox");
+  if (!w || !h) return 1;
+  let boxw = box.clientWidth, boxh = box.clientHeight;
+  let zw = boxw / w, zh = boxh / h;
+  return Math.min(zw, zh);
+}
+
+function updateStatus(msg, ok = true) {
+  const s = document.getElementById("status");
+  s.innerHTML = msg;
+  s.className = "panel-status" + (ok ? "" : " warn");
+}
+
+function clearFile(id) {
+  const inp = document.getElementById(id);
+  inp.value = "";
+  if (id === 'mainImage') {
+    document.getElementById('mainImageFilename').textContent = '未選擇檔案';
+    mainImageInfo = null;
+  } else if (id === 'maskImage') {
+    document.getElementById('maskImageFilename').textContent = '未選擇檔案';
+  }
+  updateStatus("");
+}
+
+async function onMainImageChange(input) {
+  const fileNameSpan = document.getElementById('mainImageFilename');
+  if (!input.files[0]) {
+    fileNameSpan.textContent = '未選擇檔案';
+    updateStatus("");
+    mainImageInfo = null;
+    return;
+  }
+  fileNameSpan.textContent = input.files[0].name;  
+  let file = input.files[0];
+  try {
+    let img = await loadImageFromFile(file);
+    mainImageInfo = {width: img.width, height: img.height};
+    let msg = `主圖上傳成功\n解析度：${img.width} x ${img.height}`;
+    let ok = true;
+    if (img.width !== 2750 || img.height !== 3500) {
+      msg += `\n解析度與官方psd檔不同請注意。`;
+      ok = false;
+    }
+    updateStatus(msg, ok);
+  } catch(e) {
+    updateStatus("無法讀取圖片", false);
+    mainImageInfo = null;
+  }
+}
+
+async function onMaskImageChange(input) {
+  const fileNameSpan = document.getElementById('maskImageFilename');
+  if (!input.files[0]) {
+    fileNameSpan.textContent = '未選擇檔案';
+    updateStatus("");
+    return;
+  }
+  fileNameSpan.textContent = input.files[0].name; 
+  if (!mainImageInfo) { updateStatus("請先上傳主圖", false); return; }
+  let file = input.files[0];
+  try {
+    let img = await loadImageFromFile(file);
+    if (img.width !== mainImageInfo.width || img.height !== mainImageInfo.height) {
+      updateStatus(`遮罩圖與主圖解析度不同，請再次確認。`, false);
+    } else {
+      updateStatus("遮罩圖上傳成功", true);
+    }
+  } catch(e) {
+    updateStatus("無法讀取遮罩圖", false);
+  }
+}
+
+window.onload = function() {
+  // 所有初始化事件都寫在這裡
+  document.getElementById('enableInterference').addEventListener('change', function(){
+    document.getElementById('interferenceOptions').style.display = this.checked ? 'block' : 'none';
+  });
+  document.getElementById('fillDensity').addEventListener('input', function() {
+    document.getElementById('fillDensityVal').innerText = this.value + '%';
+  });
+  document.getElementById('bg-dark').addEventListener('click', function(){ setPreviewBg('dark'); });
+  document.getElementById('bg-gray').addEventListener('click', function(){ setPreviewBg('gray'); });
+
+  setPreviewBg('dark');
+  setupPreviewZoomAndDrag();
+
+  previewFitZoom = computeFitZoom();
+  previewZoom = previewFitZoom;
+  previewOffset = {x: 0, y: 0};
+
+  // 最後重設所有欄位
+  resetAll();
+};
+
+function resetAll() {
+  document.getElementById('mainImage').value = "";
+  document.getElementById('maskImage').value = "";
+  document.getElementById('mainImageFilename').textContent = '未選擇檔案';
+  document.getElementById('maskImageFilename').textContent = '未選擇檔案';
+  document.getElementById('splitCount').value = 2;
+  document.getElementById('blockSize').value = 10;
+  document.getElementById('randomRange').value = 1;
+  document.getElementById('enableInterference').checked = false;
+  document.getElementById('interferenceOptions').style.display = "none";
+  document.getElementById('fillDensity').value = 100;
+  document.getElementById('fillDensityVal').innerText = "100%";
+  updateStatus("");
+  fragmentCanvases = [];
+  fragmentNames = [];
+  w = 0; h = 0; mainImageInfo = null; lastInterfereFlag = false;
+  currentMode = "all";
+  previewOffset = {x:0, y:0};
+  renderMainPreview();
+  updateFragmentList();
+}
+
+function setPreviewBg(type) {
+  previewBg = type;
+  let el = document.getElementById("mainPreviewBg");
+  el.classList.remove("preview-bg-gray", "preview-bg-dark");
+  if (type === "gray") el.classList.add("preview-bg-gray");
+  else if (type === "dark") el.classList.add("preview-bg-dark");
+  ["bg-dark", "bg-gray"].forEach(id => {
+    document.getElementById(id).classList.remove("active");
+  });
+  if (type === "dark")  document.getElementById("bg-dark").classList.add("active");
+  if (type === "gray")  document.getElementById("bg-gray").classList.add("active");
+  renderMainPreview();
+}
+
+function setupPreviewZoomAndDrag() {
+  let box = document.getElementById("previewAreaBox");
+  previewFitZoom = computeFitZoom();
+  previewZoom = previewFitZoom;
+  previewOffset = {x:0, y:0};
+  let dragging = false, start = {};
+  box.onmousedown = e => {
+    if (e.button !== 0) return;
+    dragging = true;
+    start = { x: e.clientX, y: e.clientY, ox: previewOffset.x, oy: previewOffset.y };
+    document.body.style.userSelect = "none";
+  };
+  document.onmouseup = () => { dragging = false; document.body.style.userSelect = ""; };
+  document.onmousemove = e => {
+    if (!dragging) return;
+    let dx = e.clientX - start.x;
+    let dy = e.clientY - start.y;
+    previewOffset.x = start.ox + dx;
+    previewOffset.y = start.oy + dy;
+    renderMainPreview();
+  };
+  box.onwheel = function(e){
+    if(fragmentCanvases.length === 0) return;
+    e.preventDefault();
+    let zoomOld = previewZoom;
+    let zoomDelta = e.deltaY < 0 ? 1.08 : 1/1.08;
+    let zoomNew = previewZoom * zoomDelta;
+    let zoomMin = computeFitZoom() * 0.1;
+    let zoomMax = 2.0;
+    if(zoomNew < zoomMin) zoomNew = zoomMin;
+    if(zoomNew > zoomMax) zoomNew = zoomMax;
+    let rect = box.getBoundingClientRect();
+    let cx = e.clientX - rect.left;
+    let cy = e.clientY - rect.top;
+    previewOffset.x = (previewOffset.x - cx) * (zoomNew/zoomOld) + cx;
+    previewOffset.y = (previewOffset.y - cy) * (zoomNew/zoomOld) + cy;
+    previewZoom = zoomNew;
+    renderMainPreview();
+    document.getElementById("zoomVal").innerText = (previewZoom*100).toFixed(0) + "%";
+  };
+  box.ontouchstart = e => {
+    if (!e.touches.length) return;
+    dragging = true;
+    let t = e.touches[0];
+    start = { x: t.clientX, y: t.clientY, ox: previewOffset.x, oy: previewOffset.y };
+  };
+  box.ontouchend = ()=>{ dragging = false; }
+  box.ontouchmove = e => {
+    if (!dragging || !e.touches.length) return;
+    let t = e.touches[0];
+    let dx = t.clientX - start.x;
+    let dy = t.clientY - start.y;
+    previewOffset.x = start.ox + dx;
+    previewOffset.y = start.oy + dy;
+    renderMainPreview();
+  };
+}
+
+function drawImageWithClampedSrc(ctx, img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH) {
+  if (srcX < 0) {
+    dstX -= srcX * (dstW / srcW);
+    dstW += srcX * (dstW / srcW);
+    srcW += srcX;
+    srcX = 0;
+  }
+  if (srcY < 0) {
+    dstY -= srcY * (dstH / srcH);
+    dstH += srcY * (dstH / srcH);
+    srcH += srcY;
+    srcY = 0;
+  }
+  if (srcX + srcW > img.width) {
+    dstW -= (srcX + srcW - img.width) * (dstW / srcW);
+    srcW = img.width - srcX;
+  }
+  if (srcY + srcH > img.height) {
+    dstH -= (srcY + srcH - img.height) * (dstH / srcH);
+    srcH = img.height - srcY;
+  }
+  if (srcW > 0 && srcH > 0 && dstW > 0 && dstH > 0) {
+    ctx.drawImage(img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH);
+  }
+}
+
+function renderMainPreview() {
+  let canvas = document.getElementById("mainPreviewCanvas");
+  let box = document.getElementById("previewAreaBox");
+  let ctx = canvas.getContext("2d");
+  let dispW = box.clientWidth, dispH = box.clientHeight;
+  canvas.width = dispW;
+  canvas.height = dispH;
+  ctx.clearRect(0, 0, dispW, dispH);
+  ctx.imageSmoothingEnabled = false;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.webkitImageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
+  if (previewBg === 'gray') {
+    ctx.fillStyle = '#888';
+    ctx.fillRect(0, 0, dispW, dispH);
+  } else if (previewBg === 'dark') {
+    ctx.fillStyle = '#222';
+    ctx.fillRect(0, 0, dispW, dispH);
+  }
+  if (fragmentCanvases.length === 0) return;
+
+  let imgw = w, imgh = h;
+  let showW = dispW / previewZoom;
+  let showH = dispH / previewZoom;
+  let srcX = -previewOffset.x / previewZoom;
+  let srcY = -previewOffset.y / previewZoom;
+
+  ctx.save();
+  if (currentMode === "all") {
+    // 這裡改成照順序依序draw，後draw的在上層（PS圖層疊加概念）
+    for (let i = fragmentCanvases.length - 1; i >= 0; i--) {
+      drawImageWithClampedSrc(ctx, fragmentCanvases[i].canvas, srcX, srcY, showW, showH, 0, 0, dispW, dispH);
+    }
+  } else if (currentMode.startsWith("fragment")) {
+    let idx = parseInt(currentMode.replace("fragment", ""));
+    drawImageWithClampedSrc(ctx, fragmentCanvases[idx].canvas, srcX, srcY, showW, showH, 0, 0, dispW, dispH);
+  }
+  ctx.restore();
+  document.getElementById("zoomVal").innerText = (previewZoom*100).toFixed(0)+"%";
+}
+
+function showAllFragments() {
+  currentMode = "all";
+  previewFitZoom = computeFitZoom();
+  previewZoom = previewFitZoom;
+  previewOffset = {x:0, y:0};
+  renderMainPreview();
+  let items = document.querySelectorAll(".fragment-row");
+  items.forEach(e=>e.classList.remove("selected"));
+  document.getElementById("zoomVal").innerText = (previewZoom*100).toFixed(0)+"%";
+}
+
+function updateFragmentList() {
+  const fragmentList = document.getElementById("fragmentList");
+  fragmentList.innerHTML = "";
+  fragmentCanvases.forEach((frag, i) => {
+    const row = document.createElement("div");
+    row.className = "fragment-row";
+    const btns = document.createElement("div");
+    btns.className = "fragment-btns";
+    const btnDownload = document.createElement("button");
+    btnDownload.innerText = "下載";
+    btnDownload.onclick = () => {
+      const tmpcanvas = document.createElement("canvas");
+      tmpcanvas.width = frag.canvas.width;
+      tmpcanvas.height = frag.canvas.height;
+      tmpcanvas.getContext("2d").drawImage(frag.canvas, 0, 0);
+      const a = document.createElement("a");
+      a.href = tmpcanvas.toDataURL();
+      a.download = fragmentNames[i] || `fragment_${i+1}.png`;
+      a.click();
+    };
+    btns.appendChild(btnDownload);
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = fragmentNames[i];
+    input.className = "fragment-name";
+    input.setAttribute("readonly", true);
+    input.onclick = () => {
+      currentMode = "fragment" + i;
+      previewFitZoom = computeFitZoom();
+      previewZoom = previewFitZoom;
+      previewOffset = {x:0, y:0};
+      renderMainPreview();
+      let all = document.querySelectorAll(".fragment-row");
+      all.forEach(e => e.classList.remove("selected"));
+      row.classList.add("selected");
+      document.getElementById("zoomVal").innerText = (previewZoom*100).toFixed(0) + "%";
+    };
+    input.ondblclick = () => {
+      input.removeAttribute("readonly");
+      input.classList.add("editable");
+      input.focus();
+      input.select();
+    };
+    input.onblur = () => {
+      input.setAttribute("readonly", true);
+      input.classList.remove("editable");
+      if (!input.value.trim().endsWith(".png")) input.value += ".png";
+      fragmentNames[i] = input.value.trim();
+    };
+    input.oninput = () => { fragmentNames[i] = input.value; };
+    row.appendChild(btns);
+    row.appendChild(input);
+    fragmentList.appendChild(row);
+  });
+}
+
+function randomRange(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+async function loadImageFromFile(file) {
+  return new Promise((resolve, reject) => {
+    let url = URL.createObjectURL(file);
+    let img = new window.Image();
+    img.onload = function() {
+      resolve(img);
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = function() {
+      reject();
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+}
+
+// ======= 完全新版 干擾像素原圖裁切方案 =======
+async function processSplit() {
+  const count = Math.min(10, Math.max(1, parseInt(document.getElementById("splitCount").value)));
+  const blockBase = parseInt(document.getElementById("blockSize").value);
+  const randomness = parseInt(document.getElementById("randomRange").value);
+  const mainFile = document.getElementById("mainImage").files[0];
+  const maskFile = document.getElementById("maskImage").files[0];
+  if (!mainFile) return updateStatus("請先上傳主圖", false);
+
+  updateStatus("拆解中...");
+  const mainImg = await loadImageFromFile(mainFile);
+  const maskImg = maskFile ? await loadImageFromFile(maskFile) : null;
+  w = mainImg.width; h = mainImg.height;
+  const mainCanvas = new OffscreenCanvas(w, h);
+  const mainCtx = mainCanvas.getContext("2d");
+  mainCtx.drawImage(mainImg, 0, 0);
+  const mainData = mainCtx.getImageData(0, 0, w, h);
+  const maskData = maskImg ? (() => {
+    const mC = new OffscreenCanvas(w, h);
+    const mCtx = mC.getContext("2d");
+    mCtx.drawImage(maskImg, 0, 0);
+    return mCtx.getImageData(0, 0, w, h);
+  })() : null;
+  function isOpaque10(x, y) {
+    if (x < 0 || y < 0 || x >= w || y >= h) return false;
+    const a = maskData ? maskData.data[(y * w + x) * 4 + 3] : mainData.data[(y * w + x) * 4 + 3];
+    return a >= 10;
+  }
+  // 1. 準備「原圖所有不透明塊」的素材 pool
+  let fillBlockPool = [];
+  for (let y = 0; y < h;) {
+    let bh = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
+    if (y + bh > h) bh = h - y;
+    for (let x = 0; x < w;) {
+      let bw = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
+      if (x + bw > w) bw = w - x;
+      // 區域有不透明像素
+      let found = false;
+      outer: for (let oy = 0; oy < bh; oy++) for (let ox = 0; ox < bw; ox++)
+        if (mainData.data[((y + oy) * w + (x + ox)) * 4 + 3] > 0) { found = true; break outer; }
+      if (found) {
+        let blockData = mainCtx.getImageData(x, y, bw, bh);
+        fillBlockPool.push({ x, y, w: bw, h: bh, data: blockData });
+      }
+      x += bw;
+    }
+    y += bh;
+  }
+
+  // 2. 一般主破碎
+  fragmentCanvases = [];
+  fragmentNames = [];
+  for (let i = 0; i < count; i++) {
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, w, h);
+    fragmentCanvases.push({ canvas, ctx, data: ctx.getImageData(0, 0, w, h) });
+    fragmentNames.push(`碎片_${i+1}.png`);
+  }
+  const pixelOwnership = new Array(h).fill(null).map(() => new Array(w).fill(-1));
+  for (let y = 0; y < h;) {
+    const bh = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
+    if (y + bh > h) break;
+    for (let x = 0; x < w;) {
+      const bw = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
+      if (x + bw > w) break;
+      let found = false;
+      outerloop:
+      for (let by = 0; by < bh; by++)
+        for (let bx = 0; bx < bw; bx++)
+          if (isOpaque10(x + bx, y + by)) { found = true; break outerloop; }
+      if (!found) { x += bw; continue; }
+      const dest = mainCtx.getImageData(x, y, bw, bh);
+      const owner = Math.floor(Math.random() * count);
+      fragmentCanvases.forEach((frag, idx) => {
+        const d = frag.data.data;
+        for (let i = 0; i < bw * bh * 4; i += 4) {
+          const dx = (Math.floor(i / 4) % bw) + x;
+          const dy = Math.floor(i / 4 / bw) + y;
+          const idx4 = (dy * w + dx) * 4;
+          if (idx === owner) {
+            d[idx4] = dest.data[i];
+            d[idx4 + 1] = dest.data[i + 1];
+            d[idx4 + 2] = dest.data[i + 2];
+            d[idx4 + 3] = dest.data[i + 3];
+            if (dest.data[i + 3] === 255) pixelOwnership[dy][dx] = owner;
+          }
+        }
+      });
+      x += bw;
+    }
+    y += bh;
+  }
+
+  // 3. 干擾填補（啟用才做）
+  const enableInterference = document.getElementById("enableInterference").checked;
+  lastInterfereFlag = enableInterference && count >= 2;
+  if (lastInterfereFlag) {
+    const fillDensity = parseInt(document.getElementById('fillDensity').value) / 100; // 1~100%
+    // 取得第一片碎片的完全不透明遮罩
+    let opaqueMask = new Array(h).fill(null).map(()=>new Array(w).fill(false));
+    let frag1Data = fragmentCanvases[0].data.data;
+    for(let y1=0; y1<h; y1++) for(let x1=0; x1<w; x1++) {
+      let a = frag1Data[(y1*w+x1)*4+3];
+      if(a === 255) opaqueMask[y1][x1] = true;
+    }
+    for (let layer = 1; layer < count; layer++) {
+      let layerData = fragmentCanvases[layer].data;
+      let fillablePos = [];
+      for(let y=0; y<h; y++) for(let x=0; x<w; x++)
+        if(opaqueMask[y][x]) fillablePos.push({x, y});
+      fillablePos = fillablePos.sort(()=>Math.random()-0.5);
+      let fillCount = Math.floor(fillablePos.length * fillDensity);
+      let filledMask = new Array(h).fill(null).map(()=>new Array(w).fill(false));
+      for(let i=0; i<fillCount; i++) {
+        let {x, y} = fillablePos[i];
+        let tryTimes = 0, block = null;
+        while(tryTimes < 20 && !block) {
+          let cand = fillBlockPool[Math.floor(Math.random()*fillBlockPool.length)];
+          if(x + cand.w > w || y + cand.h > h) { tryTimes++; continue; }
+          let ok = true;
+          for(let dy=0; dy<cand.h && ok; dy++) for(let dx=0; dx<cand.w; dx++)
+            if(!opaqueMask[y+dy][x+dx] || filledMask[y+dy][x+dx]) { ok = false; break; }
+          if(ok) block = cand;
+          tryTimes++;
+        }
+        if(!block) continue;
+        for(let by=0; by<block.h; by++)
+          for(let bx=0; bx<block.w; bx++) {
+            let ti = ((y+by)*w+(x+bx))*4;
+            let si = (by*block.w+bx)*4;
+            for(let c=0; c<4; c++)
+              layerData.data[ti+c] = block.data.data[si+c];
+            filledMask[y+by][x+bx] = true;
+          }
+      }
+      fragmentCanvases[layer].ctx.putImageData(layerData, 0, 0);
+    }
+  }
+  fragmentCanvases.forEach(frag => {
+    frag.ctx.putImageData(frag.data, 0, 0);
+  });
+  updateFragmentList();
+  showAllFragments();
+  updateStatus("拆解完成，共 " + count + " 張碎片", true);
+}
+
+function downloadAll() {
+  if (fragmentCanvases.length === 0) return updateStatus("請先拆解圖片", false);
+  const zip = new JSZip();
+  fragmentCanvases.forEach((frag, i) => {
+    let fname = fragmentNames[i];
+    if (!fname.endsWith('.png')) fname += ".png";
+    zip.file(fname, frag.canvas.toDataURL().split(",")[1], { base64: true });
+  });
+  zip.generateAsync({ type: "blob" }).then(content => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(content);
+    a.download = "fragments.zip";
+    a.click();
+  });
+  updateStatus("已打包 ZIP");
+}
+</script>
+</body>
+</html>
