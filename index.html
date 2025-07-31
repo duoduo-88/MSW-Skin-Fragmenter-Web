@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1</title>
+  <title>MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1.0.1</title>
   <style>
-    /* ... 你的CSS原樣保留 ... */
     html, body { height:100%; margin:0; padding:0; background: #222;}
     body { font-family: Arial, sans-serif; margin:0; padding:0;}
     #mainwrap { max-width:1280px; margin:0 auto; padding-top:38px;}
@@ -178,7 +177,6 @@
       <div class="right-pane">
         <div id="status" class="panel-status"></div>
         <div class="ctrl-block file-block">
-        <!-- 主圖 -->
         <div class="file-block">
           <label for="mainImage">上傳主圖（PNG，含透明區）：<span class="qmark" tabindex="0">?<span class="qtip">請上傳要分割的原始圖檔，需為 PNG 格式並包含透明區域。
 		  
@@ -193,7 +191,6 @@
             <span class="filename" id="mainImageFilename">未選擇檔案</span>
           </div>
         </div>
-        <!-- 遮罩 -->
         <div class="file-block">
           <label for="maskImage">上傳遮罩圖（可選）：<span class="qmark" tabindex="0">?<span class="qtip">可選擇上傳一張 PNG 遮罩圖，遮罩需與主圖解析度完全相同。
 		  
@@ -268,7 +265,6 @@
             </span>
           </label>
         </div>
-        <!-- 新增 干擾密度滑桿 -->
         <div id="interferenceOptions" style="display:none;">
           <div class="ctrl-block">
             <label for="fillDensity">干擾密度：
@@ -376,7 +372,6 @@ async function onMaskImageChange(input) {
 }
 
 window.onload = function() {
-  // 所有初始化事件都寫在這裡
   document.getElementById('enableInterference').addEventListener('change', function(){
     document.getElementById('interferenceOptions').style.display = this.checked ? 'block' : 'none';
   });
@@ -393,7 +388,6 @@ window.onload = function() {
   previewZoom = previewFitZoom;
   previewOffset = {x: 0, y: 0};
 
-  // 最後重設所有欄位
   resetAll();
 };
 
@@ -546,7 +540,6 @@ function renderMainPreview() {
 
   ctx.save();
   if (currentMode === "all") {
-    // 這裡改成照順序依序draw，後draw的在上層（PS圖層疊加概念）
     for (let i = fragmentCanvases.length - 1; i >= 0; i--) {
       drawImageWithClampedSrc(ctx, fragmentCanvases[i].canvas, srcX, srcY, showW, showH, 0, 0, dispW, dispH);
     }
@@ -642,7 +635,18 @@ async function loadImageFromFile(file) {
   });
 }
 
-// ======= 完全新版 干擾像素原圖裁切方案 =======
+function applyMaskToFragment(fragData, maskData, w, h) {
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const idx = (y * w + x) * 4;
+    if (maskData.data[idx + 3] === 0) {
+      fragData.data[idx + 3] = 0;
+      fragData.data[idx + 0] = 0;
+      fragData.data[idx + 1] = 0;
+      fragData.data[idx + 2] = 0;
+    }
+  }
+}
+
 async function processSplit() {
   const count = Math.min(10, Math.max(1, parseInt(document.getElementById("splitCount").value)));
   const blockBase = parseInt(document.getElementById("blockSize").value);
@@ -670,7 +674,6 @@ async function processSplit() {
     const a = maskData ? maskData.data[(y * w + x) * 4 + 3] : mainData.data[(y * w + x) * 4 + 3];
     return a >= 10;
   }
-  // 1. 準備「原圖所有不透明塊」的素材 pool
   let fillBlockPool = [];
   for (let y = 0; y < h;) {
     let bh = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
@@ -678,7 +681,6 @@ async function processSplit() {
     for (let x = 0; x < w;) {
       let bw = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
       if (x + bw > w) bw = w - x;
-      // 區域有不透明像素
       let found = false;
       outer: for (let oy = 0; oy < bh; oy++) for (let ox = 0; ox < bw; ox++)
         if (mainData.data[((y + oy) * w + (x + ox)) * 4 + 3] > 0) { found = true; break outer; }
@@ -691,59 +693,64 @@ async function processSplit() {
     y += bh;
   }
 
-  // 2. 一般主破碎
   fragmentCanvases = [];
   fragmentNames = [];
-  for (let i = 0; i < count; i++) {
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, w, h);
-    fragmentCanvases.push({ canvas, ctx, data: ctx.getImageData(0, 0, w, h) });
-    fragmentNames.push(`碎片_${i+1}.png`);
-  }
-  const pixelOwnership = new Array(h).fill(null).map(() => new Array(w).fill(-1));
-  for (let y = 0; y < h;) {
-    const bh = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
-    if (y + bh > h) break;
-    for (let x = 0; x < w;) {
-      const bw = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
-      if (x + bw > w) break;
-      let found = false;
-      outerloop:
-      for (let by = 0; by < bh; by++)
-        for (let bx = 0; bx < bw; bx++)
-          if (isOpaque10(x + bx, y + by)) { found = true; break outerloop; }
-      if (!found) { x += bw; continue; }
-      const dest = mainCtx.getImageData(x, y, bw, bh);
-      const owner = Math.floor(Math.random() * count);
-      fragmentCanvases.forEach((frag, idx) => {
-        const d = frag.data.data;
-        for (let i = 0; i < bw * bh * 4; i += 4) {
-          const dx = (Math.floor(i / 4) % bw) + x;
-          const dy = Math.floor(i / 4 / bw) + y;
-          const idx4 = (dy * w + dx) * 4;
-          if (idx === owner) {
-            d[idx4] = dest.data[i];
-            d[idx4 + 1] = dest.data[i + 1];
-            d[idx4 + 2] = dest.data[i + 2];
-            d[idx4 + 3] = dest.data[i + 3];
-            if (dest.data[i + 3] === 255) pixelOwnership[dy][dx] = owner;
-          }
-        }
-      });
-      x += bw;
-    }
-    y += bh;
-  }
+	for (let i = 0; i < count; i++) {
+	  const canvas = document.createElement("canvas");
+	  canvas.width = w;
+	  canvas.height = h;
+	  const ctx = canvas.getContext("2d");
+	  ctx.clearRect(0, 0, w, h);
+	  fragmentCanvases.push({ canvas, ctx, data: ctx.getImageData(0, 0, w, h) });
+	  fragmentNames.push(`碎片_${i+1}.png`);
+	}
 
-  // 3. 干擾填補（啟用才做）
+	const pixelOwnership = new Array(h).fill(null).map(() => new Array(w).fill(-1));
+	for (let y = 0; y < h;) {
+	  const bh = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
+	  if (y + bh > h) break;
+	  for (let x = 0; x < w;) {
+		const bw = blockBase * (randomness === 1 ? 1 : randomRange(1, randomness));
+		if (x + bw > w) break;
+		let found = false;
+		outerloop:
+		for (let by = 0; by < bh; by++)
+		  for (let bx = 0; bx < bw; bx++)
+			if (isOpaque10(x + bx, y + by)) { found = true; break outerloop; }
+		if (!found) { x += bw; continue; }
+		const dest = mainCtx.getImageData(x, y, bw, bh);
+		const owner = Math.floor(Math.random() * count);
+		fragmentCanvases.forEach((frag, idx) => {
+		  const d = frag.data.data;
+		  for (let i = 0; i < bw * bh * 4; i += 4) {
+			const dx = (Math.floor(i / 4) % bw) + x;
+			const dy = Math.floor(i / 4 / bw) + y;
+			const idx4 = (dy * w + dx) * 4;
+			if (idx === owner) {
+			  d[idx4] = dest.data[i];
+			  d[idx4 + 1] = dest.data[i + 1];
+			  d[idx4 + 2] = dest.data[i + 2];
+			  d[idx4 + 3] = dest.data[i + 3];
+			  if (dest.data[i + 3] === 255) pixelOwnership[dy][dx] = owner;
+			}
+		  }
+		});
+		x += bw;
+	  }
+	  y += bh;
+	}
+
+	if (maskData) {
+	  fragmentCanvases.forEach(frag => {
+		applyMaskToFragment(frag.data, maskData, w, h);
+		frag.ctx.putImageData(frag.data, 0, 0);
+	  });
+	}
+	
   const enableInterference = document.getElementById("enableInterference").checked;
   lastInterfereFlag = enableInterference && count >= 2;
   if (lastInterfereFlag) {
     const fillDensity = parseInt(document.getElementById('fillDensity').value) / 100; // 1~100%
-    // 取得第一片碎片的完全不透明遮罩
     let opaqueMask = new Array(h).fill(null).map(()=>new Array(w).fill(false));
     let frag1Data = fragmentCanvases[0].data.data;
     for(let y1=0; y1<h; y1++) for(let x1=0; x1<w; x1++) {
