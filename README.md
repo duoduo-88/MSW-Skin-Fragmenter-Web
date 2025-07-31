@@ -18,13 +18,12 @@
 
 ---
 
-## 遮罩分割新邏輯
+## 遮罩分割邏輯優化說明
 
-- **遮罩僅決定分割範圍，分割後不再強制依 alpha>0 裁切內部像素**
-- 每個碎片皆完整覆蓋遮罩內區域，不再因遮罩邊緣反覆裁切導致破碎或異常小塊
-- 分割更自然，碎片形狀更合理，避免過多零散細碎圖塊
-- 程式運作流程更精簡、執行效能更佳
-- 遮罩設計更直觀，用戶僅需關心需要「限制」的範圍
+- **遮罩現在僅用來決定分割區域，而不會再於每張碎片做 alpha>0 的二次裁切**
+- 每個碎片會完整覆蓋遮罩有效範圍，不再因反覆裁切產生過多零碎細塊或破碎邊緣
+- 分割流程更直觀、效能提升，碎片分佈更自然，避免異常小塊或過度破碎
+- 遮罩只需設計限制範圍，不需擔心碎片被重複多次切割
 
 ---
 
@@ -52,10 +51,29 @@
 
 ---
 
-## 開源授權
+## 開源授權 (MIT License)
 
-本專案採用開源授權，歡迎自由檢視、學習、修改與再發佈。請保留原作者資訊，二次發佈請註明來源。  
-（建議 MIT 或 GPL，請依實際需求補充）
+MIT License
+
+Copyright (c) 2025 DuoDuo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ---
 
