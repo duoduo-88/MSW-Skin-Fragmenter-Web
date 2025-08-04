@@ -1,12 +1,9 @@
-# MSW造型防盜拆解工具 Web v1.0.1
-
-**MSW Skin Fragmenter Web**  
+# MSW造型防盜拆解工具 Web MSW Skin Fragmenter Web
 一款開源、易用的圖像分割防盜工具，可將含透明區的 PNG 主圖依指定規則自動切割為多片碎片，顯著提升圖片二次拼合與逆向還原的難度。  
 支援遮罩分割、自訂碎片數量、尺寸與隨機度、原圖干擾像素等多項進階防護機制，並提供即時預覽與一鍵打包下載功能。
 
 
-## 功能特色
-
+## 基主要功能
 - 支援 PNG 主圖，完整保留透明度資訊
 - 可選擇遮罩圖，自訂分割區域
 - 分割張數、方塊尺寸、隨機度皆可調整，分割效果更不規則
@@ -17,15 +14,13 @@
 
 
 ## 遮罩分割邏輯說明
-
 - **遮罩僅用於決定分割區域，不再對每個碎片進行 alpha>0 的二次裁切**
 - 每個碎片皆可完整覆蓋遮罩有效範圍，避免反覆裁切產生零碎邊緣
 - 分割流程更直觀、效能更高，碎片分布自然，降低異常小塊或過度破碎情況
 - 遮罩只需設計分割範圍，無須擔心碎片被多次裁切
 
 
-## 操作說明
-
+## 基本操作說明
 1. **上傳主圖**  
    僅支援 PNG，且需包含透明區。
 2. **（可選）上傳遮罩圖**  
@@ -37,21 +32,17 @@
 4. **執行拆解**  
    即時預覽及管理所有碎片，可逐一命名、瀏覽、下載
 5. **一鍵打包 ZIP 下載所有碎片**
+6. **手動放入MSW提供的原始psd檔**
 
 
 ## 注意事項
-
 - 本工具**僅於本地瀏覽器執行**，不會將圖片檔案上傳至網路
-- 防盜分割無法絕對保證圖片「不可還原」，安全性取決於主圖內容及參數配置  
-  參考密碼學 Kerckhoffs's Principle：「安全性應建立於輸入的不確定性，而非演算法本身」
+- 防盜分割無法絕對保證圖片「不可還原」，安全性取決於主圖內容及參數配置
+- 參考密碼學 Kerckhoffs's Principle：「安全性應建立於輸入的不確定性，而非演算法本身」
 
 ## 授權
-
-MIT License。使用者需自負風險，作者不負任何責任。
-
-作者：DuoDuo  
-發布：2025
-
+- 本專案採用 MIT License，使用者需自負風險，作者不承擔任何法律責任。
+  
 MIT License
 
 Copyright (c) 2025 DuoDuo
@@ -73,3 +64,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+作者：DuoDuo  
+發布：2025
