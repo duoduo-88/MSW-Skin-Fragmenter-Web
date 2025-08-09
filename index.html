@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1.0.1</title>
+  <title>MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1.0.2</title>
   <style>
     html, body { height:100%; margin:0; padding:0; background: #222;}
     body { font-family: Arial, sans-serif; margin:0; padding:0;}
@@ -140,12 +140,102 @@
     .file-input-row input[type="file"] { flex-shrink: 0;}
     .clear-btn { font-size: 20px; background: transparent; border: none; color: #f55; cursor: pointer; padding: 0; line-height: 1; flex-shrink: 0;}
     .filename { font-size: 14px; color: #ddd; word-break: break-word; white-space: normal; user-select: text; flex-grow: 1; min-width: 0;}
+  
+/* --- injected fix: keep action buttons on one line --- */
+.right-pane { max-width: 360px; }  /* widen so three buttons fit */
+.ctrl-block.btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  white-space: nowrap;   /* prevent wrapping */
+  overflow-x: auto;      /* if space is tight (mobile), allow horizontal scroll */
+}
+.ctrl-block.btns button {
+  margin-right: 0;
+  margin-bottom: 0;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+/* --- end injected fix --- */
+
+  
+/* --- injected fix v2: widen fragment name display area --- */
+#fragmentPanel { max-width: 520px; } /* give the panel more room */
+#fragmentList { width: 100%; }
+
+/* Make the filename span take most of the row width */
+.fragment-row .fragment-name {
+  flex: 1 1 auto;
+  min-width: 0;              /* allow flexbox to actually shrink siblings */
+  white-space: nowrap;       /* keep names on one line */
+  overflow: hidden;          /* avoid spilling out of the row */
+  text-overflow: ellipsis;   /* show ellipsis if still too long */
+}
+
+/* Ensure other controls do not steal width */
+.fragment-row > :not(.fragment-name) {
+  flex: 0 0 auto;
+}
+
+/* Slightly increase right-side column width if present */
+.right-pane { max-width: 520px; }
+
+  
+/* --- injected fix v3: expand rename input width --- */
+.fragment-row .fragment-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.fragment-row .fragment-name.editable {
+  max-width: none !important; /* remove 200px cap while editing */
+  width: 100% !important;     /* take full available width in the row */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;        /* allow cursor to reach end without ellipsis */
+}
+/* --- end fix v3 --- */
+
+  
+/* --- injected fix v4: shrink right panel but keep 3 buttons on one line --- */
+.right-pane {
+  flex: 0 0 auto;         /* do not stretch in the flex row */
+  width: fit-content;     /* shrink-to-fit content */
+  max-width: none !important;
+}
+#fragmentPanel {
+  max-width: none !important;  /* don't cap the panel width */
+  width: auto;
+}
+/* Button row stays in one line */
+.ctrl-block.btns {
+  display: inline-flex;   /* shrink to content width */
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+.ctrl-block.btns button {
+  flex: 0 0 auto;
+  margin: 0;
+}
+/* Keep editable filename input wide within its row, but within the (now smaller) panel width */
+.fragment-row .fragment-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.fragment-row .fragment-name.editable {
+  max-width: none !important;
+  width: 100% !important;
+}
+/* --- end fix v4 --- */
+
   </style>
 </head>
 <body>
   <div id="mainwrap">
     <div class="headerwrap">
-      <div class="tooltitle">MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1.0.1</div>
+      <div class="tooltitle">MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1.0.2</div>
       <div class="copyright">
         © 2025 DuoDuo｜聯絡信箱：
         <a href="mailto:duoduobaobao88@gmail.com">duoduobaobao88@gmail.com</a>
@@ -156,7 +246,7 @@
 		</span>
 		<span class="disclaimer" tabindex="0" style="margin-left:18px;">
 		  開源聲明
-		  <span class="disclaimer-tip">本工具採用開源模式發布，歡迎任何人自由檢視、學習、修改或再發佈。所有原始碼、說明文件及最新版本皆可於 GitHub 取得，使用時請遵守原始授權條款（MIT），並保留原作者資訊。如有改作或二次發布，請務必明確標示來源及相關說明。
+		  <span class="disclaimer-tip">本工具以開源方式發布，任何人皆可自由檢視、學習、修改與再發佈。原始碼、說明文件與最新版本均可於 GitHub 取得。請遵守原授權條款（如 MIT、GPL 等），並保留原作者資訊。如有改作、二次發布，請明確標示來源。
 		  </span>
 		</span>		
       </div>
