@@ -69,9 +69,7 @@ Supports mask-based splitting, customizable fragment count, size and randomness,
 ## 注意事項 | Notes
 
   干擾像素與重疊像素功能非常重要，請盡可能優先使用。  不要為了拆更多層碎片而犧牲這些功能的效果。如果缺乏干擾像素，現代的圖像偵測 AI 可以輕鬆還原碎片，降低防盜效果。    
-  The functions of interference pixels and overlapping pixels are very important and should be prioritized whenever possible.  
-  Do not sacrifice these features just to split the image into more fragments.  
-  Without interference pixels, modern image detection AI can easily restore the fragments, reducing anti-theft effectiveness.  
+  The functions of interference pixels and overlapping pixels are very important and should be prioritized whenever possible.  Do not sacrifice these features just to split the image into more fragments.Without interference pixels, modern image detection AI can easily restore the fragments, reducing anti-theft effectiveness.  
   
   本工具**僅於本地瀏覽器執行**，不會將圖片檔案上傳至網路  
   This tool runs entirely in the local browser and does not upload any files online
