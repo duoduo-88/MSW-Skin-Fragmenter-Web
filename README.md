@@ -29,7 +29,7 @@ Supports mask-based splitting, customizable fragment count, size and randomness,
 
 ## 遮罩分割邏輯說明 | Mask Splitting Logic
 
-- **遮罩僅用於決定分割區域，不再對每個碎片進行 alpha>0 的二次裁切**  
+- 遮罩僅用於決定分割區域，不再對每個碎片進行 alpha>0 的二次裁切  
   Mask is only used to define the split area, without additional alpha>0 trimming on each fragment
 - 每個碎片皆可完整覆蓋遮罩有效範圍，避免反覆裁切產生零碎邊緣  
   Each fragment can fully cover the valid mask area to avoid fragmented edges from repeated cropping
