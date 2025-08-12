@@ -82,7 +82,7 @@ Supports mask-based splitting, customizable fragment count, size and randomness,
 
 ---
 
-## 📜 授權 | License
+## 授權 | License
 
 MIT License
 
