@@ -301,7 +301,7 @@
               <span class="qtip">決定要將圖片分割成幾個碎片，通常越多越難重組與逆向。</span>
             </span>
           </label>
-          <input type="number" id="splitCount" min="1" max="10" value="2" style="width:70px;">
+          <input type="number" id="splitCount" min="1" max="10" value="7" style="width:70px;">
         </div>
         <div class="ctrl-block">
           <label for="blockSize">方塊尺寸（1~30 px）：
@@ -319,7 +319,7 @@
 			  </span>
             </span>
           </label>
-          <input type="number" id="blockSize" min="1" max="30" value="10" style="width:70px;">
+          <input type="number" id="blockSize" min="1" max="30" value="3" style="width:70px;">
         </div>
         <div class="ctrl-block">
           <label for="randomRange">尺寸隨機度（1~100）：
@@ -336,11 +336,11 @@
 			  </span></span>
             </span>
           </label>
-          <input type="number" id="randomRange" min="1" max="100" value="1" style="width:70px;">
+          <input type="number" id="randomRange" min="1" max="100" value="7" style="width:70px;">
         </div>
         <div class="ctrl-block">
           <label>
-            <input type="checkbox" id="enableInterference">
+            <input type="checkbox" id="enableInterference" checked>
             啟用原圖裁切干擾像素
             <span class="qmark" tabindex="0">?
               <span class="qtip">啟用後，會於第2層以後碎片，以第1層碎片的不透明區域「填充」主圖中隨機區塊做為干擾像素。
@@ -486,11 +486,11 @@ function resetAll() {
   document.getElementById('maskImage').value = "";
   document.getElementById('mainImageFilename').textContent = '未選擇檔案';
   document.getElementById('maskImageFilename').textContent = '未選擇檔案';
-  document.getElementById('splitCount').value = 2;
-  document.getElementById('blockSize').value = 10;
-  document.getElementById('randomRange').value = 1;
-  document.getElementById('enableInterference').checked = false;
-  document.getElementById('interferenceOptions').style.display = "none";
+  document.getElementById('splitCount').value = 7;
+  document.getElementById('blockSize').value = 3;
+  document.getElementById('randomRange').value = 7;
+  document.getElementById('enableInterference').checked = true;
+  document.getElementById('interferenceOptions').style.display = "block";
   document.getElementById('fillDensity').value = 100;
   document.getElementById('fillDensityVal').innerText = "100%";
   updateStatus("");
@@ -907,3 +907,4 @@ function downloadAll() {
 </script>
 </body>
 </html>
+
