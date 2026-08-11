@@ -517,8 +517,8 @@
               <span data-i18n="density">干擾密度：</span>
               <span class="qmark" tabindex="0">?<span class="qtip" data-i18n="densityTip">設定干擾像素的填入比例。</span></span>
             </label>
-            <input type="range" id="fillDensity" min="1" max="100" value="100" style="width:120px">
-            <span id="fillDensityVal">100%</span>
+            <input type="range" id="fillDensity" min="1" max="100" value="20" style="width:120px">
+            <span id="fillDensityVal">20%</span>
           </div>
         </div>
 
@@ -1080,7 +1080,7 @@
       const count = readInteger("splitCount", 1, 10, 7);
       const blockSize = readInteger("blockSize", 1, 30, 3);
       const randomFactor = readInteger("randomRange", 1, 100, 7);
-      const fillPercent = readInteger("fillDensity", 1, 100, 100);
+      const fillPercent = readInteger("fillDensity", 1, 100, 20);
       updateStatus("statusSplitting", true);
       await new Promise(function(resolve) { requestAnimationFrame(resolve); });
 
