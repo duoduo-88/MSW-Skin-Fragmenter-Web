@@ -1,12 +1,16 @@
-# Third-Party Notices
+# Third-Party Notices｜第三方授權聲明
 
-The MIT License in this repository applies to MSW Skin Fragmenter Web itself. The following dependency retains its own copyright and license terms.
+The repository's MIT License applies to MSW Skin Fragmenter Web itself. The dependency below retains its own copyright and license terms.
+
+本 repository 的 MIT License 適用於 MSW Skin Fragmenter Web 本身；以下相依套件保留其原始著作權與授權條款。
 
 ## JSZip 3.10.0
 
-- Project: [Stuk/jszip](https://github.com/Stuk/jszip)
-- Loaded by `index.html` from jsDelivr
-- License: dual-licensed under the MIT License or GNU GPL version 3; this project uses it under the MIT option
-- License text: [JSZip v3.10.0 LICENSE.markdown](https://github.com/Stuk/jszip/blob/v3.10.0/LICENSE.markdown)
+- Project｜專案：[Stuk/jszip](https://github.com/Stuk/jszip)
+- Source｜載入來源：jsDelivr
+- License｜授權：MIT or GNU GPL version 3（本專案採 MIT 選項）
+- License text｜授權全文：[JSZip v3.10.0 LICENSE.markdown](https://github.com/Stuk/jszip/blob/v3.10.0/LICENSE.markdown)
 
-JSZip is not authored or maintained by DuoDuo. The CDN service is also operated independently of this project.
+JSZip and jsDelivr are not authored, operated, or maintained by DuoDuo.
+
+JSZip 與 jsDelivr 並非由 DuoDuo 開發、營運或維護。
