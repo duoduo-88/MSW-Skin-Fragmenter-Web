@@ -4,7 +4,7 @@
 
 MSW Skin Fragmenter Web is a lightweight, browser-based PNG fragmentation tool for artwork protection workflows.
 
-Current version: **v1.1.0**
+Current version: **v1.1.1**
 
 > Fragmentation is an obfuscation aid, not encryption. It cannot guarantee that an image will never be reconstructed.
 
