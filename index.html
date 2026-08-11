@@ -242,8 +242,7 @@
       font-size: 15px;
     }
 
-    input[type="number"],
-    input[type="file"] {
+    input[type="number"] {
       max-width: 100%;
       padding: 4px 6px;
       color: #222;
@@ -261,6 +260,11 @@
     }
 
     .file-input-row.single-button { display: block; }
+
+    .file-picker-button {
+      min-width: 78px;
+      padding: 5px 12px;
+    }
 
     .clear-btn {
       flex: 0 0 auto;
@@ -434,7 +438,8 @@
             <span class="qmark" tabindex="0">?<span class="qtip" data-i18n="uploadMainTip">請選擇含透明度的 PNG。建議尺寸為 2750 × 3500；其他尺寸仍可拆解。</span></span>
           </label>
           <div class="file-input-row single-button">
-            <input type="file" id="mainImage" accept="image/png">
+            <input type="file" id="mainImage" accept="image/png" hidden>
+            <button class="file-picker-button" type="button" data-file-input="mainImage" data-i18n="browseFile">瀏覽…</button>
           </div>
           <div class="file-input-row">
             <button class="clear-btn" type="button" data-clear-file="mainImage" aria-label="Clear main image">&times;</button>
@@ -448,7 +453,8 @@
             <span class="qmark" tabindex="0">?<span class="qtip" data-i18n="uploadMaskTip">遮罩須為與主圖相同尺寸的 PNG；非透明範圍會納入拆解。</span></span>
           </label>
           <div class="file-input-row single-button">
-            <input type="file" id="maskImage" accept="image/png">
+            <input type="file" id="maskImage" accept="image/png" hidden>
+            <button class="file-picker-button" type="button" data-file-input="maskImage" data-i18n="browseFile">瀏覽…</button>
           </div>
           <div class="file-input-row">
             <button class="clear-btn" type="button" data-clear-file="maskImage" aria-label="Clear mask image">&times;</button>
@@ -550,6 +556,7 @@
         uploadMainTip: "請選擇含透明度的 PNG。建議尺寸為 2750 × 3500；其他尺寸仍可拆解。",
         uploadMask: "上傳遮罩圖（可選）：",
         uploadMaskTip: "遮罩須為與主圖相同尺寸的 PNG；非透明範圍會納入拆解。",
+        browseFile: "瀏覽…",
         notSelected: "未選擇檔案",
         splitCount: "拆分張數（1～10）",
         splitCountTip: "設定輸出的碎片張數。",
@@ -601,6 +608,7 @@
         uploadMainTip: "Choose a PNG with transparency. The recommended size is 2750 × 3500; other sizes can still be processed.",
         uploadMask: "Upload mask (optional):",
         uploadMaskTip: "The mask must be a PNG matching the source dimensions. Non-transparent areas are included in the split.",
+        browseFile: "Browse…",
         notSelected: "No file selected",
         splitCount: "Fragment count (1–10)",
         splitCountTip: "Sets the number of output fragments.",
@@ -1423,6 +1431,11 @@
     function initialize() {
       document.getElementById("mainImage").addEventListener("change", onMainImageChange);
       document.getElementById("maskImage").addEventListener("change", onMaskImageChange);
+      document.querySelectorAll("[data-file-input]").forEach(function(button) {
+        button.addEventListener("click", function() {
+          document.getElementById(button.dataset.fileInput).click();
+        });
+      });
       document.querySelectorAll("[data-clear-file]").forEach(function(button) {
         button.addEventListener("click", function() { clearFile(button.dataset.clearFile); });
       });
