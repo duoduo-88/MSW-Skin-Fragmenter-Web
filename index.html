@@ -158,7 +158,7 @@
     }
 
     #languageToggle {
-      margin-right: 5px;
+      margin-right: auto;
       background: #3f5367;
     }
 
@@ -185,8 +185,11 @@
       margin-bottom: 16px;
       border: 2px solid #444;
       background: #333;
+      cursor: grab;
       touch-action: none;
     }
+
+    #previewAreaBox.dragging { cursor: grabbing; }
 
     #mainPreviewBg,
     #mainPreviewCanvas {
@@ -205,14 +208,12 @@
     #mainPreviewBg.preview-bg-gray { background: #888; }
     #mainPreviewBg.preview-bg-dark { background: #222; }
     #mainPreviewBg.preview-bg-checker {
-      background-color: #fff;
-      background-image:
-        linear-gradient(45deg, #bdbdbd 25%, transparent 25%),
-        linear-gradient(-45deg, #bdbdbd 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #bdbdbd 75%),
-        linear-gradient(-45deg, transparent 75%, #bdbdbd 75%);
-      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
-      background-size: 24px 24px;
+      background: conic-gradient(
+        #bdbdbd 0 25%,
+        #fff 0 50%,
+        #bdbdbd 0 75%,
+        #fff 0
+      ) 0 0 / 24px 24px;
     }
 
     #mainPreviewCanvas {
@@ -225,13 +226,16 @@
     .panel-status {
       display: flex;
       align-items: center;
+      height: 32px;
       min-height: 32px;
       margin-bottom: 10px;
+      overflow: hidden;
       color: #67e667;
       font-size: 15px;
       font-weight: bold;
       line-height: 1.45;
-      white-space: pre-line;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .panel-status.warn { color: #ff6b6b; }
@@ -320,17 +324,24 @@
       white-space: nowrap;
     }
 
+    .fragment-output {
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .fragment-output .btns { width: 100%; }
+
     .fragment-list-title {
       margin: 16px 0 8px;
       font-size: 14px;
     }
 
     #fragmentPanel {
+      width: 100%;
       min-height: 56px;
-      padding: 14px 12px 16px;
-      border-radius: 12px;
-      background: #1a1a1a;
-      box-shadow: 0 2px 10px #0002;
+      padding: 8px;
+      border-radius: 6px;
+      background: #1d1d1d;
     }
 
     .fragment-row {
@@ -422,8 +433,8 @@
     <div class="flexrow">
       <section class="left-pane" aria-label="Preview">
         <div class="preview-ctrl-bar">
-          <span data-i18n="backgroundLabel">背景：</span>
           <button type="button" id="languageToggle">English</button>
+          <span data-i18n="backgroundLabel">背景：</span>
           <button type="button" id="bg-dark" data-i18n="bgDark">深灰</button>
           <button type="button" id="bg-gray" data-i18n="bgGray">50%灰</button>
           <button type="button" id="bg-checker" data-i18n="bgChecker">棋盤格</button>
@@ -511,15 +522,17 @@
           </div>
         </div>
 
-        <div class="ctrl-block btns">
-          <button type="button" id="splitButton" data-i18n="splitButton">執行拆解</button>
-          <button type="button" id="restoreButton" data-i18n="restoreButton">還原預覽</button>
-          <button type="button" id="zipButton" data-i18n="zipButton">全部打包 ZIP</button>
-        </div>
+        <div class="fragment-output">
+          <div class="ctrl-block btns">
+            <button type="button" id="splitButton" data-i18n="splitButton">執行拆解</button>
+            <button type="button" id="restoreButton" data-i18n="restoreButton">還原預覽</button>
+            <button type="button" id="zipButton" data-i18n="zipButton">全部打包 ZIP</button>
+          </div>
 
-        <div class="fragment-list-title" data-i18n="fragmentList">碎片清單</div>
-        <div id="fragmentPanel">
-          <div id="fragmentList"></div>
+          <div class="fragment-list-title" data-i18n="fragmentList">碎片清單</div>
+          <div id="fragmentPanel">
+            <div id="fragmentList"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -664,6 +677,8 @@
     let previewFitZoom = 1;
     let previewOffset = { x: 0, y: 0 };
     let lastStatus = null;
+    let combinedPreviewCanvas = null;
+    let previewRenderFrame = 0;
 
     function text(key, variables) {
       let value = translations[currentLanguage][key] || key;
@@ -702,12 +717,14 @@
       const status = document.getElementById("status");
       if (!key) {
         status.textContent = "";
+        status.removeAttribute("title");
         status.className = "panel-status";
         lastStatus = null;
         return;
       }
       lastStatus = { key: key, ok: ok !== false, variables: variables || {} };
       status.textContent = text(key, variables);
+      status.title = status.textContent;
       status.className = "panel-status" + (ok === false ? " warn" : "");
     }
 
@@ -737,6 +754,7 @@
     function clearGeneratedOutput() {
       fragmentCanvases = [];
       fragmentNames = [];
+      clearCombinedPreview();
       width = 0;
       height = 0;
       currentMode = "all";
@@ -1087,7 +1105,7 @@
           maskData = maskWorking.context.getImageData(0, 0, width, height);
         }
 
-        const fragmentPixels = splitImageData(
+        let fragmentPixels = splitImageData(
           mainData,
           maskData,
           count,
@@ -1101,7 +1119,9 @@
         fragmentCanvases = fragmentPixels.map(function(pixels) {
           return { canvas: canvasFromPixels(pixels, width, height) };
         });
-        fragmentNames = fragmentPixels.map(function(_, index) {
+        fragmentPixels = null;
+        rebuildCombinedPreview();
+        fragmentNames = fragmentCanvases.map(function(_, index) {
           return text("fragmentBase") + "_" + (index + 1) + ".png";
         });
         updateFragmentList();
@@ -1130,7 +1150,35 @@
       ["dark", "gray", "checker"].forEach(function(name) {
         document.getElementById("bg-" + name).classList.toggle("active", name === previewBg);
       });
-      renderMainPreview();
+    }
+
+    function requestPreviewRender() {
+      if (previewRenderFrame) return;
+      previewRenderFrame = requestAnimationFrame(function() {
+        previewRenderFrame = 0;
+        renderMainPreview();
+      });
+    }
+
+    function clearCombinedPreview() {
+      if (combinedPreviewCanvas) {
+        combinedPreviewCanvas.width = 0;
+        combinedPreviewCanvas.height = 0;
+      }
+      combinedPreviewCanvas = null;
+    }
+
+    function rebuildCombinedPreview() {
+      clearCombinedPreview();
+      if (!fragmentCanvases.length || !width || !height) return;
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      for (let index = fragmentCanvases.length - 1; index >= 0; index--) {
+        context.drawImage(fragmentCanvases[index].canvas, 0, 0);
+      }
+      combinedPreviewCanvas = canvas;
     }
 
     function drawImageWithClampedSource(context, image, sourceX, sourceY, sourceWidth, sourceHeight, displayWidth, displayHeight) {
@@ -1174,13 +1222,19 @@
     }
 
     function renderMainPreview() {
+      if (previewRenderFrame) {
+        cancelAnimationFrame(previewRenderFrame);
+        previewRenderFrame = 0;
+      }
       const canvas = document.getElementById("mainPreviewCanvas");
       const box = document.getElementById("previewAreaBox");
-      const context = canvas.getContext("2d");
-      const displayWidth = box.clientWidth;
-      const displayHeight = box.clientHeight;
-      canvas.width = displayWidth;
-      canvas.height = displayHeight;
+      const displayWidth = Math.max(1, Math.round(box.clientWidth));
+      const displayHeight = Math.max(1, Math.round(box.clientHeight));
+      if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+        canvas.width = displayWidth;
+        canvas.height = displayHeight;
+      }
+      const context = canvas.getContext("2d", { alpha: true, desynchronized: true });
       context.clearRect(0, 0, displayWidth, displayHeight);
       context.imageSmoothingEnabled = false;
       if (!fragmentCanvases.length || !width || !height) {
@@ -1193,10 +1247,10 @@
       const sourceX = -previewOffset.x / previewZoom;
       const sourceY = -previewOffset.y / previewZoom;
       if (currentMode === "all") {
-        for (let index = fragmentCanvases.length - 1; index >= 0; index--) {
+        if (combinedPreviewCanvas) {
           drawImageWithClampedSource(
             context,
-            fragmentCanvases[index].canvas,
+            combinedPreviewCanvas,
             sourceX,
             sourceY,
             sourceWidth,
@@ -1375,27 +1429,45 @@
       const box = document.getElementById("previewAreaBox");
       let dragging = false;
       let start = null;
+      let activePointer = null;
 
-      box.addEventListener("mousedown", function(event) {
+      box.addEventListener("pointerdown", function(event) {
         if (event.button !== 0 || !fragmentCanvases.length) return;
         dragging = true;
+        activePointer = event.pointerId;
         start = {
           x: event.clientX,
           y: event.clientY,
           offsetX: previewOffset.x,
           offsetY: previewOffset.y
         };
-        document.body.style.userSelect = "none";
+        box.setPointerCapture(event.pointerId);
+        box.classList.add("dragging");
+        event.preventDefault();
       });
-      document.addEventListener("mouseup", function() {
+
+      function stopDragging(event) {
+        if (!dragging || (event && event.pointerId !== activePointer)) return;
         dragging = false;
-        document.body.style.userSelect = "";
+        if (activePointer !== null && box.hasPointerCapture(activePointer)) {
+          box.releasePointerCapture(activePointer);
+        }
+        activePointer = null;
+        box.classList.remove("dragging");
+      }
+
+      box.addEventListener("pointerup", stopDragging);
+      box.addEventListener("pointercancel", stopDragging);
+      box.addEventListener("lostpointercapture", function() {
+        dragging = false;
+        activePointer = null;
+        box.classList.remove("dragging");
       });
-      document.addEventListener("mousemove", function(event) {
-        if (!dragging) return;
+      box.addEventListener("pointermove", function(event) {
+        if (!dragging || event.pointerId !== activePointer) return;
         previewOffset.x = start.offsetX + event.clientX - start.x;
         previewOffset.y = start.offsetY + event.clientY - start.y;
-        renderMainPreview();
+        requestPreviewRender();
       });
       box.addEventListener("wheel", function(event) {
         if (!fragmentCanvases.length) return;
@@ -1412,26 +1484,8 @@
         previewOffset.x = (previewOffset.x - cursorX) * (nextZoom / oldZoom) + cursorX;
         previewOffset.y = (previewOffset.y - cursorY) * (nextZoom / oldZoom) + cursorY;
         previewZoom = nextZoom;
-        renderMainPreview();
+        requestPreviewRender();
       }, { passive: false });
-
-      box.addEventListener("touchstart", function(event) {
-        if (!event.touches.length || !fragmentCanvases.length) return;
-        dragging = true;
-        start = {
-          x: event.touches[0].clientX,
-          y: event.touches[0].clientY,
-          offsetX: previewOffset.x,
-          offsetY: previewOffset.y
-        };
-      }, { passive: true });
-      box.addEventListener("touchend", function() { dragging = false; });
-      box.addEventListener("touchmove", function(event) {
-        if (!dragging || !event.touches.length) return;
-        previewOffset.x = start.offsetX + event.touches[0].clientX - start.x;
-        previewOffset.y = start.offsetY + event.touches[0].clientY - start.y;
-        renderMainPreview();
-      }, { passive: true });
     }
 
     function initialize() {
