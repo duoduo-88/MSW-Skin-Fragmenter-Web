@@ -63,11 +63,29 @@
     }
 
     .copyright {
-      margin-top: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 100%;
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px solid #383838;
       color: #aaa;
       font-size: 12px;
-      line-height: 1.7;
+      line-height: 1.5;
       text-align: center;
+    }
+
+    .footer-item {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .footer-separator {
+      margin: 0 8px;
+      color: #666;
     }
 
     .copyright a {
@@ -84,7 +102,6 @@
     .disclaimer {
       display: inline-block;
       position: relative;
-      margin-left: 16px;
       color: #a9a9df;
       border-bottom: 1px dashed currentColor;
       cursor: help;
@@ -182,7 +199,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      margin-bottom: 16px;
+      margin-bottom: 0;
       border: 2px solid #444;
       background: #333;
       cursor: grab;
@@ -419,8 +436,8 @@
         white-space: normal;
       }
       .zoomval { margin-left: 0; }
-      .copyright { line-height: 1.8; }
-      .disclaimer { margin-left: 10px; }
+      .copyright { line-height: 1.7; }
+      .footer-separator { margin: 0 6px; }
     }
   </style>
 </head>
@@ -444,6 +461,27 @@
           <div id="mainPreviewBg"></div>
           <canvas id="mainPreviewCanvas"></canvas>
         </div>
+        <footer class="copyright">
+          <span class="footer-item">© 2025 DuoDuo</span>
+          <span class="footer-item">
+            <span class="footer-separator" aria-hidden="true">·</span>
+            <a href="https://ko-fi.com/duoduo88" target="_blank" rel="noopener noreferrer">ko-fi.com/duoduo88</a>
+          </span>
+          <span class="footer-item">
+            <span class="footer-separator" aria-hidden="true">·</span>
+            <span class="disclaimer" tabindex="0">
+              <span data-i18n="disclaimerLabel">免責聲明</span>
+              <span class="disclaimer-tip" data-i18n="disclaimerText">本工具僅提供輔助性圖像保護，無法保證拆解結果不會被還原。使用者應自行評估並承擔使用風險。</span>
+            </span>
+          </span>
+          <span class="footer-item">
+            <span class="footer-separator" aria-hidden="true">·</span>
+            <span class="disclaimer" tabindex="0">
+              <span data-i18n="openSourceLabel">開源聲明</span>
+              <span class="disclaimer-tip" data-i18n="openSourceText">本工具以開源方式發布。使用、修改或再次發布時，請遵守授權條款並保留原作者與來源資訊。</span>
+            </span>
+          </span>
+        </footer>
       </section>
 
       <section class="right-pane" aria-label="Controls">
@@ -537,18 +575,6 @@
       </section>
     </div>
 
-    <footer class="copyright">
-      © 2025 DuoDuo｜
-      <a href="https://ko-fi.com/duoduo88" target="_blank" rel="noopener noreferrer">ko-fi.com/duoduo88</a>｜
-      <span class="disclaimer" tabindex="0">
-        <span data-i18n="disclaimerLabel">免責聲明</span>
-        <span class="disclaimer-tip" data-i18n="disclaimerText">本工具僅提供輔助性圖像保護，無法保證拆解結果不會被還原。使用者應自行評估並承擔使用風險。</span>
-      </span>
-      <span class="disclaimer" tabindex="0">
-        <span data-i18n="openSourceLabel">開源聲明</span>
-        <span class="disclaimer-tip" data-i18n="openSourceText">本工具以開源方式發布。使用、修改或再次發布時，請遵守授權條款並保留原作者與來源資訊。</span>
-      </span>
-    </footer>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.0/dist/jszip.min.js"></script>
