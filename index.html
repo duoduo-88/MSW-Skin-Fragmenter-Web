@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1.1.0</title>
+  <title>MSW Skin Fragmenter Web v1.1.0</title>
   <style>
     :root {
+      --interface-scale: 1.3;
       color-scheme: dark;
       font-family: Arial, "Noto Sans TC", sans-serif;
     }
@@ -38,9 +39,11 @@
     }
 
     #mainwrap {
+      width: calc(100% / var(--interface-scale));
       max-width: 1280px;
       margin: 0 auto;
       padding: 38px 16px 28px;
+      zoom: var(--interface-scale);
     }
 
     .headerwrap {
@@ -147,6 +150,7 @@
       justify-content: flex-end;
       gap: 8px;
       width: 100%;
+      min-height: 32px;
       margin-bottom: 10px;
       color: #fff;
       font-size: 15px;
@@ -219,7 +223,9 @@
     }
 
     .panel-status {
-      min-height: 38px;
+      display: flex;
+      align-items: center;
+      min-height: 32px;
       margin-bottom: 10px;
       color: #67e667;
       font-size: 15px;
@@ -387,15 +393,15 @@
 
     .fragment-name[readonly] { caret-color: transparent; }
 
-    @media (max-width: 880px) {
+    @media (max-width: 1144px) {
       #mainwrap { padding: 20px 10px; }
       .flexrow { flex-direction: column; align-items: center; }
       .right-pane { width: 600px; }
-      #previewAreaBox { height: min(780px, 125vw); }
+      #previewAreaBox { height: min(780px, calc(125vw / var(--interface-scale))); }
       .qtip { left: auto; right: 0; }
     }
 
-    @media (max-width: 620px) {
+    @media (max-width: 806px) {
       .preview-ctrl-bar {
         justify-content: flex-start;
         flex-wrap: wrap;
@@ -410,7 +416,7 @@
 <body>
   <main id="mainwrap">
     <header class="headerwrap">
-      <h1 class="tooltitle" data-i18n="toolTitle">MSW造型防盜拆解工具 MSW Skin Fragmenter Web v1.1.0</h1>
+      <h1 class="tooltitle" data-i18n="toolTitle">MSW Skin Fragmenter Web v1.1.0</h1>
     </header>
 
     <div class="flexrow">
@@ -541,8 +547,8 @@
     const EN = "en";
     const translations = {
       "zh-TW": {
-        toolTitle: "MSW造型防盜拆解工具 MSW Skin Fragmenter Web v" + VERSION,
-        pageTitle: "MSW造型防盜拆解工具 MSW Skin Fragmenter Web v" + VERSION,
+        toolTitle: "MSW Skin Fragmenter Web v" + VERSION,
+        pageTitle: "MSW Skin Fragmenter Web v" + VERSION,
         disclaimerLabel: "免責聲明",
         disclaimerText: "本工具僅提供輔助性圖像保護，無法保證拆解結果不會被還原。使用者應自行評估並承擔使用風險。",
         openSourceLabel: "開源聲明",
