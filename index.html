@@ -69,8 +69,6 @@
       flex-wrap: wrap;
       width: 100%;
       margin-top: 10px;
-      padding-top: 9px;
-      border-top: 1px solid #383838;
       color: #aaa;
       font-size: 12px;
       line-height: 1.5;
@@ -185,9 +183,8 @@
     }
 
     .zoomval {
-      min-width: 106px;
-      margin-left: 6px;
-      text-align: left;
+      margin-right: 6px;
+      text-align: right;
     }
 
     #previewAreaBox {
@@ -435,7 +432,7 @@
         flex-wrap: wrap;
         white-space: normal;
       }
-      .zoomval { margin-left: 0; }
+      .zoomval { margin-right: 0; }
       .copyright { line-height: 1.7; }
       .footer-separator { margin: 0 6px; }
     }
@@ -451,11 +448,11 @@
       <section class="left-pane" aria-label="Preview">
         <div class="preview-ctrl-bar">
           <button type="button" id="languageToggle">English</button>
+          <span class="zoomval"><span data-i18n="zoomLabel">縮放：</span><span id="zoomVal">100%</span></span>
           <span data-i18n="backgroundLabel">背景：</span>
           <button type="button" id="bg-dark" data-i18n="bgDark">深灰</button>
           <button type="button" id="bg-gray" data-i18n="bgGray">50%灰</button>
           <button type="button" id="bg-checker" data-i18n="bgChecker">棋盤格</button>
-          <span class="zoomval"><span data-i18n="zoomLabel">縮放：</span><span id="zoomVal">100%</span></span>
         </div>
         <div id="previewAreaBox">
           <div id="mainPreviewBg"></div>
