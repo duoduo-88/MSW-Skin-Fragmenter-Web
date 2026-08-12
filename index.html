@@ -4,14 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MSW Skin Fragmenter Web v1.1.1</title>
+  <link rel="preload" href="assets/fonts/noto-sans-tc-ui.woff2" as="font" type="font/woff2" crossorigin>
   <style>
+    @font-face {
+      font-family: "MSW Noto Sans TC";
+      src: url("assets/fonts/noto-sans-tc-ui.woff2") format("woff2");
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: block;
+    }
+
     :root {
       --interface-scale: 1.3;
       color-scheme: dark;
-      font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+      font-family: "MSW Noto Sans TC", sans-serif;
     }
-
-    html[lang="en"] { font-family: Arial, sans-serif; }
 
     * { box-sizing: border-box; }
 
@@ -375,16 +382,20 @@
       background: #202020;
     }
 
+    #fragmentList {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
     .fragment-row {
       display: flex;
       align-items: center;
       gap: 6px;
       min-height: 32px;
-      border-bottom: 1px solid #414141;
+      border-radius: 6px;
       background: #2d2d2d;
     }
-
-    .fragment-row:last-child { border-bottom: 0; }
 
     .fragment-row:hover { background: #353535; }
 
@@ -1412,9 +1423,6 @@
         nameInput.readOnly = true;
         nameInput.addEventListener("click", function() {
           currentMode = "fragment" + index;
-          previewFitZoom = computeFitZoom();
-          previewZoom = previewFitZoom;
-          previewOffset = { x: 0, y: 0 };
           document.querySelectorAll(".fragment-row").forEach(function(item) {
             item.classList.remove("selected");
           });
