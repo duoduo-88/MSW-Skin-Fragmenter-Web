@@ -260,10 +260,14 @@
     }
 
     label {
-      display: block;
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      max-width: 100%;
       margin-bottom: 5px;
       color: #eee;
       font-size: 15px;
+      line-height: 1.35;
     }
 
     input[type="number"] {
@@ -307,20 +311,30 @@
     }
 
     .qmark {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
-      width: 18px;
-      height: 18px;
-      margin-left: 4px;
-      border-radius: 50%;
-      background: #555;
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      margin-left: 6px;
+      border: 1px solid #696969;
+      border-radius: 5px;
+      background: #4b4b4b;
       color: #fff;
       cursor: help;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
-      line-height: 18px;
-      text-align: center;
+      line-height: 1;
       vertical-align: middle;
+    }
+
+    .qmark:hover,
+    .qmark:focus {
+      border-color: #8a8a8a;
+      background: #626262;
+      outline: none;
     }
 
     .qtip {
